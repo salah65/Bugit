@@ -1,9 +1,19 @@
 package com.example.bugit.features.home_screen.presentation
 
+import androidx.lifecycle.viewModelScope
 import com.example.bugit.core.BaseViewModel
+import com.example.bugit.features.home_screen.data.model.Resource
+import com.example.bugit.features.home_screen.domain.image.useCase.GetImageUrlUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
-class HomeScreenViewModel() : BaseViewModel<HomeScreenState, HomeScreenEvent>() {
+@HiltViewModel
+class HomeScreenViewModel @Inject constructor(
+    private val getImageUrlUseCase: GetImageUrlUseCase
+) : BaseViewModel<HomeScreenState, HomeScreenEvent>() {
     override val privateState = MutableStateFlow(HomeScreenState())
 
     override fun onEvent(event: HomeScreenEvent) {
@@ -35,9 +45,31 @@ class HomeScreenViewModel() : BaseViewModel<HomeScreenState, HomeScreenEvent>() 
             )
             return
         }
-        privateState.apply {
-            value = value.copy(showLoadingDialog = true)
-        }
+
+        getImageUrlUseCase(
+            imageUri = privateState.value.selectedImageUri!!
+        ).onEach { resource ->
+            privateState.apply {
+                when (resource) {
+                    is Resource.Loading -> {
+                        onEvent(HomeScreenEvent.DismissAllDialog)
+                        value = value.copy(showLoadingDialog = true)
+                    }
+
+                    is Resource.Success -> {
+                        value = value.copy(imageUrl = resource.data.data.displayUrl, showLoadingDialog = false)
+                        uploadBug()
+                    }
+
+                    is Resource.Error -> {
+                        onEvent(HomeScreenEvent.DismissAllDialog)
+                        value =
+                            value.copy(showErrorDialog = true, dialogText = resource.error.message)
+                    }
+                }
+            }
+
+        }.launchIn(viewModelScope)
     }
 
     private fun uploadBug() {
