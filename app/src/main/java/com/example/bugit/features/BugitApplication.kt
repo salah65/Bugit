@@ -1,4 +1,4 @@
-package com.example.bugit.core
+package com.example.bugit.features
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

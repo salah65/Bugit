@@ -97,6 +97,12 @@ fun BugSubmissionScreen() {
             viewModel.onEvent(HomeScreenEvent.DismissAllDialog)
         }
     }
+    LaunchedEffect(state.showSuccessDialog) {
+        if (state.showSuccessDialog) {
+            Toast.makeText(context, state.dialogText, Toast.LENGTH_SHORT).show()
+            viewModel.onEvent(HomeScreenEvent.DismissAllDialog)
+        }
+    }
     CircularProgressBar(state = state)
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(

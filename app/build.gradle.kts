@@ -65,6 +65,8 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
 //    implementation(libs.dagger.hilt)
     testImplementation(libs.junit)
     implementation(libs.hilt.android)

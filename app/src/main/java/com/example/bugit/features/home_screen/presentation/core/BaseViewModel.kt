@@ -1,4 +1,4 @@
-package com.example.bugit.core
+package com.example.bugit.features.home_screen.presentation.core
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
