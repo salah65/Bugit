@@ -1,4 +1,4 @@
-package com.example.bugit.features.home_screen
+package com.example.bugit.features.home_screen.presentation
 
 import android.app.Activity
 import android.content.Intent

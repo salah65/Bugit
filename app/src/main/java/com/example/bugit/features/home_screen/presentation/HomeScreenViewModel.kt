@@ -1,10 +1,7 @@
-package com.example.bugit.features.home_screen
+package com.example.bugit.features.home_screen.presentation
 
-import androidx.lifecycle.viewModelScope
 import com.example.bugit.core.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 class HomeScreenViewModel() : BaseViewModel<HomeScreenState, HomeScreenEvent>() {
     override val privateState = MutableStateFlow(HomeScreenState())
