@@ -1,4 +1,4 @@
-package com.example.bugit.home_screen
+package com.example.bugit.features.home_screen
 
 import android.net.Uri
 
