@@ -27,7 +27,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -92,15 +94,13 @@ fun BugSubmissionScreen() {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val stroke = Stroke(
-        width = 2f,
-        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+        width = 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
     )
 
 
-    val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> viewModel.onEvent(HomeScreenEvent.OnImageUriChanged(uri)) }
-    )
+    val singlePhotoPickerLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia(),
+            onResult = { uri -> viewModel.onEvent(HomeScreenEvent.OnImageUriChanged(uri)) })
 
     val intent = (LocalContext.current as Activity).intent
     LaunchedEffect(intent) {
@@ -123,21 +123,18 @@ fun BugSubmissionScreen() {
             viewModel.onEvent(HomeScreenEvent.DismissAllDialog)
         }
     }
-    CircularProgressBar(state = state)
+
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            modifier = Modifier.background(Color.Blue),
-            title = {
-                Text(stringResource(R.string.report_a_problem))
-            },
-            actions = {
-                IconButton(onClick = { viewModel.onEvent(HomeScreenEvent.Submit) }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_submit),
-                        contentDescription = "submit"
-                    )
-                }
-            },
+        TopAppBar(modifier = Modifier.background(Color.Blue), title = {
+            Text(stringResource(R.string.report_a_problem))
+        }, actions = {
+            IconButton(onClick = { viewModel.onEvent(HomeScreenEvent.Submit) }) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_submit),
+                    contentDescription = "submit"
+                )
+            }
+        },
 
             colors = topAppBarColors(
                 containerColor = colorResource(id = R.color.blue),
@@ -146,8 +143,7 @@ fun BugSubmissionScreen() {
 
         )
 
-        OutlinedTextField(
-            value = state.description,
+        OutlinedTextField(value = state.description,
             onValueChange = {
                 viewModel.onEvent(HomeScreenEvent.OnDescriptionChanged(it))
             },
@@ -159,26 +155,22 @@ fun BugSubmissionScreen() {
 
         )
 
-        Box(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxSize()
-                .weight(1f)
-                .drawBehind {
-                    drawRoundRect(
-                        color = Color.LightGray,
-                        style = stroke,
-                        cornerRadius = CornerRadius(10f)
+        Box(modifier = Modifier
+            .padding(16.dp)
+            .fillMaxSize()
+            .weight(1f)
+            .drawBehind {
+                drawRoundRect(
+                    color = Color.LightGray, style = stroke, cornerRadius = CornerRadius(10f)
+                )
+            }
+            .clickable {
+                singlePhotoPickerLauncher.launch(
+                    PickVisualMediaRequest(
+                        ActivityResultContracts.PickVisualMedia.ImageOnly
                     )
-                }
-                .clickable {
-                    singlePhotoPickerLauncher.launch(
-                        PickVisualMediaRequest(
-                            ActivityResultContracts.PickVisualMedia.ImageOnly
-                        )
-                    )
-                }
-        ) {
+                )
+            }) {
 
             if (state.selectedImageUri == null) {
                 Image(
@@ -191,11 +183,9 @@ fun BugSubmissionScreen() {
             } else {
                 AsyncImage(
                     model = ImageRequest.Builder(context).data(state.selectedImageUri)
-                        .allowHardware(false)
-                        .build(),
+                        .allowHardware(false).build(),
                     contentDescription = null, // Provide a content description if needed
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit,
 
 
@@ -209,16 +199,15 @@ fun BugSubmissionScreen() {
                 .imePadding(),
             verticalArrangement = Arrangement.Bottom
         ) {
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    captureScreenshot(context)?.let { bitmap ->
-                        saveBitmapToFile(bitmap, context).let { uri ->
-                            viewModel.onEvent(HomeScreenEvent.OnImageUriChanged(uri))
-                        }
+            Button(modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(id = R.color.blue), contentColor = Color.White
+            ), shape = RoundedCornerShape(3.dp), onClick = {
+                captureScreenshot(context)?.let { bitmap ->
+                    saveBitmapToFile(bitmap, context).let { uri ->
+                        viewModel.onEvent(HomeScreenEvent.OnImageUriChanged(uri))
                     }
                 }
-            ) {
+            }) {
                 Row {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_screenshot),
@@ -232,20 +221,19 @@ fun BugSubmissionScreen() {
         }
 
     }
+    CircularProgressBar(state = state)
 }
 
 @Composable
 fun CircularProgressBar(modifier: Modifier = Modifier, state: HomeScreenState) {
-    if (state.showLoadingDialog)
-        Box(
-            modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                color = Color.Blue, // Customize the color of the progress indicator
-                strokeWidth = 8.dp // Customize the stroke width of the progress indicator
-            )
-        }
+    if (state.showLoadingDialog) Box(
+        modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            color = colorResource(id = R.color.blue), // Customize the color of the progress indicator
+            strokeWidth = 8.dp // Customize the stroke width of the progress indicator
+        )
+    }
 }
 
 fun captureScreenshot(context: Context): Bitmap? {
