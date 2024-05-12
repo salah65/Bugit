@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <external-path
+        name="external_files"
+        path="." /> <!-- Access to app's external files directory -->
+    <!-- Add more <external-path> or <files-path> tags for other directories -->
+</paths>

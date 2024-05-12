@@ -1,9 +1,12 @@
 package com.example.bugit.features.home_screen.presentation
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -46,13 +49,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.bugit.R
 import com.example.bugit.ui.theme.BugitTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+
+private const val TAG = "HomeActivty"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -61,7 +69,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             BugitTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    BugSubmissionScreen()
+                    BugSubmissionScreen(activity = this)
                 }
             }
         }
@@ -70,8 +78,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
-fun BugSubmissionScreen() {
+fun BugSubmissionScreen(activity: Context) {
     val viewModel = viewModel<HomeScreenViewModel>()
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
@@ -160,11 +167,11 @@ fun BugSubmissionScreen() {
             Button(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    singlePhotoPickerLauncher.launch(
-                        PickVisualMediaRequest(
-                            ActivityResultContracts.PickVisualMedia.ImageOnly
-                        )
-                    )
+                    captureScreenshot(activity)?.let {bitmap->
+                        saveBitmapToFile(bitmap, activity).let {uri->
+                           viewModel.onEvent(HomeScreenEvent.OnImageUriChanged(uri))
+                        }
+                    }
                 }
             ) {
                 Row {
@@ -217,4 +224,30 @@ fun CircularProgressBar(modifier: Modifier = Modifier, state: HomeScreenState) {
         }
 }
 
+fun captureScreenshot(context: Context): Bitmap? {
+    val window = (context as? Activity)?.window ?: return null
+    val view = window.decorView.rootView
+    view.isDrawingCacheEnabled = true
+    val bitmap = Bitmap.createBitmap(view.drawingCache)
+    view.isDrawingCacheEnabled = false
+    return bitmap
+}
 
+fun saveBitmapToFile(bitmap: Bitmap, context: Context): Uri? {
+    return try {val imagesDir = File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "my_images")
+    if (!imagesDir.exists()) {
+        imagesDir.mkdirs() // Create directory if it doesn't exist
+    }
+    val file = File(imagesDir, "image_${System.currentTimeMillis()}.png")
+    // Compress bitmap to PNG format (you can change PNG to JPEG or WEBP)
+    val os = FileOutputStream(file)
+    bitmap.compress(Bitmap.CompressFormat.PNG, 100, os)
+    os.flush()
+    os.close()
+    FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    } catch (e: IOException) {
+        e.printStackTrace()
+        // Handle file IO exception
+        null
+    }
+}
