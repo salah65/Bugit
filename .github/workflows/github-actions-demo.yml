@@ -46,7 +46,6 @@ jobs:
           subject: Opportunity for you
           to: salah.mohamed@miu.edu
           from: GitHub Action
-          html_body: file://temp.html
           secure: true
           ignore_cert: true
           convert_markdown: true
