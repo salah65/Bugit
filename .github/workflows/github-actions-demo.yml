@@ -34,8 +34,28 @@ jobs:
         id: uploadArtifact
         uses: actions/upload-artifact@v4
         with:
-          name: app
+          name: app-release
           path: app/build/outputs/bundle/release/app-release.aab
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: 'v1.0.0'
+          release_name: 'v1.0.0'
+          body: "First release of the app"
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: app/build/outputs/bundle/release/app-release.aab
+          asset_name: app-release.aab
+          asset_content_type: application/octet-stream
       - name: Send mail
         uses: dawidd6/action-send-mail@v3
         with:
@@ -43,12 +63,11 @@ jobs:
           server_port: 465
           username: ${{ secrets.EMAIL }}
           password: ${{ secrets.PASSWORD }}
-          subject: App Release !!
-          to: salahsamy512@gmail.com
+          subject: New Bugit APP release built
+          to: Salahsamy512@gmail.com
           from: GitHub Action
-          body: "Please find the attached app-release.aab file."
+          body: "A new release has been created. Please find the attached app-release.aab file."
           secure: true
           ignore_cert: true
-          convert_markdown: true
           priority: low
           attachments: app/build/outputs/bundle/release/app-release.aab
