@@ -46,6 +46,7 @@ jobs:
           subject: Opportunity for you
           to: salah.mohamed@miu.edu
           from: GitHub Action
+          body: "Please find the attached app-release.aab file."
           secure: true
           ignore_cert: true
           convert_markdown: true
