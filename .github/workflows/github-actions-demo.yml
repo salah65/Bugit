@@ -13,6 +13,8 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '8.0.292+10'
+      - name: Grant execute permission for Gradle Wrapper
+        run: chmod +x ./gradlew
       - name: Build with Gradle
         id: build
         run: ./gradlew build
